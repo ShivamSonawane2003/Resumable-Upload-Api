@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  resumable-upload-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resumable-upload-api
+    ports:
+      - "8003:8003"
+    volumes:
+      # Mount project directory for hot reload during development
+      - .:/app
+      # Exclude virtual environment and cache directories
+      - /app/venv
+      - /app/__pycache__
+      - /app/.pytest_cache
+    environment:
+      - DEBUG=true
+      - HOST=0.0.0.0
+      - PORT=8003
+      - ENV=prod
+      - STORAGE_BACKEND=S3
+      - STATE_BACKEND=SQLITE
+      - LOG_LEVEL=INFO
+      - AWS_REGION=ap-south-1
+      - S3_BUCKET_NAME=ai-stolity-fileupload
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    restart: always
+    # Docker performance optimizations
+    shm_size: '512mb'  # Increase shared memory for better performance
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    # For development with hot reload, uncomment the command below
+    # command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
